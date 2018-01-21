@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import axios from 'axios';
 import moment from 'moment';
 import Dropdown from '../components/dropdown';
-import Graph from '../components/graph';
+import Chart from '../components/chart';
 import { TypeChooser } from "react-stockcharts/lib/helper";
 // import {CandlestickChart} from 'react-d3';
 
@@ -18,7 +18,7 @@ export default class ExchangeContainer extends Component {
             market: 'BTC/USDT',
             timeframes: [],
             timeframe: '1h',
-            graphData: [],
+            data: [],
         };
     
         this.handleExchangeChange = this.handleExchangeChange.bind(this);
@@ -28,7 +28,10 @@ export default class ExchangeContainer extends Component {
     }
 
     componentDidMount() {
-        this.loadGraph();
+        const date = moment().subtract(5, 'days').unix();
+        axios.get(`/api/ccxt/${this.state.exchange}/${this.state.market}/${this.state.timeframe}/${date}000/400`).then(data => {
+			this.setState({ data })
+		})
         this.loadMarkets(this.state.exchange);
     }
     
@@ -62,30 +65,7 @@ export default class ExchangeContainer extends Component {
             //     values: priceData,
             // }
             console.log(graphData);
-            this.setState({graphData});
-        } catch (error) {
-            console.log(error);
-            return false;
-        }
-    }
-
-    async loadGraph() {
-        const exchange = this.state.exchange;
-        const market = this.state.market.replace('/', '%2F');
-        const timeframe = this.state.timeframe;
-        const date = moment().subtract(5, 'days').unix();
-        const limit = '400';
-        try {
-            const getData = await axios.get(`/api/ccxt/${exchange}/${market}/${timeframe}/${date}000/${limit}`);
-            const graphData = getData.data.closingPrice;
-            // const priceDataArr = priceData.map((data) => data.y);
-            // const timeDataArr = priceData.map((data) => data.x);
-            // const graphData = {
-            //     name: this.state.market,
-            //     values: priceData,
-            // }
-            console.log(graphData);
-            this.setState({graphData});
+            this.setState({data: graphData});
         } catch (error) {
             console.log(error);
             return false;
@@ -112,7 +92,7 @@ export default class ExchangeContainer extends Component {
     }
 
     render() {
-        if (this.state.graphData == null) {
+        if (this.state.data == null) {
 			return <div>Loading...</div>
 		}
         return (
@@ -139,7 +119,7 @@ export default class ExchangeContainer extends Component {
                     <input type='submit' value='Submit' />
                 </form>
                 <TypeChooser>
-                    {type => <Graph type={type} data={this.state.graphData} />}
+                    {type => <Chart type={type} data={this.state.data} />}
                 </TypeChooser>
             </div>
         )

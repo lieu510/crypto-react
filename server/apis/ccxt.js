@@ -73,7 +73,7 @@ module.exports = function(app) {
             for (var i = 0; i < info.length; i++) {
                 infoItem = info[i];
                 plotData2.push({
-                    x: infoItem[0],
+                    date: infoItem[0],
                     open: infoItem[1],
                     high: infoItem[2],
                     low: infoItem[3],
