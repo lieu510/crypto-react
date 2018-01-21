@@ -1,16 +1,10 @@
 import React, {Component} from 'react';
 import axios from 'axios';
-import Dropdown from '../components/dropdown';
-// import Graph from '../components/graph';
-// import {CandlestickChart} from 'react-d3';
-import { ChartCanvas, Chart } from "react-stockcharts";
-import { CandlestickSeries } from "react-stockcharts/lib/series";
-import { XAxis, YAxis } from "react-stockcharts/lib/axes";
-import { fitWidth } from "react-stockcharts/lib/helper";
-import { last, timeIntervalBarWidth } from "react-stockcharts/lib/utils";
-import { scaleTime } from "d3-scale";
-import { utcDay } from "d3-time";
 import moment from 'moment';
+import Dropdown from '../components/dropdown';
+import Graph from '../components/graph';
+import { TypeChooser } from "react-stockcharts/lib/helper";
+// import {CandlestickChart} from 'react-d3';
 
 const exchanges = ["bittrex", "binance"];
 // let markets = [];
@@ -21,19 +15,10 @@ export default class ExchangeContainer extends Component {
         this.state = {
             exchange: 'bittrex',
             markets: [],
-            market: '',
+            market: 'BTC/USDT',
             timeframes: [],
-            timeframe: '',
-            graphData: {
-                name: '',
-                values: [{
-                    x: moment(),
-                    open: 0,
-                    high: 0,
-                    low: 0,
-                    close: 0,
-                }],
-            },
+            timeframe: '1h',
+            graphData: [],
         };
     
         this.handleExchangeChange = this.handleExchangeChange.bind(this);
@@ -43,6 +28,7 @@ export default class ExchangeContainer extends Component {
     }
 
     componentDidMount() {
+        this.loadGraph();
         this.loadMarkets(this.state.exchange);
     }
     
@@ -68,13 +54,36 @@ export default class ExchangeContainer extends Component {
         const limit = '400';
         try {
             const getData = await axios.get(`/api/ccxt/${exchange}/${market}/${timeframe}/${date}000/${limit}`);
-            const priceData = getData.data.closingPrice;
+            const graphData = getData.data.closingPrice;
             // const priceDataArr = priceData.map((data) => data.y);
             // const timeDataArr = priceData.map((data) => data.x);
-            const graphData = {
-                name: this.state.market,
-                values: priceData,
-            }
+            // const graphData = {
+            //     name: this.state.market,
+            //     values: priceData,
+            // }
+            console.log(graphData);
+            this.setState({graphData});
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+
+    async loadGraph() {
+        const exchange = this.state.exchange;
+        const market = this.state.market.replace('/', '%2F');
+        const timeframe = this.state.timeframe;
+        const date = moment().subtract(5, 'days').unix();
+        const limit = '400';
+        try {
+            const getData = await axios.get(`/api/ccxt/${exchange}/${market}/${timeframe}/${date}000/${limit}`);
+            const graphData = getData.data.closingPrice;
+            // const priceDataArr = priceData.map((data) => data.y);
+            // const timeDataArr = priceData.map((data) => data.x);
+            // const graphData = {
+            //     name: this.state.market,
+            //     values: priceData,
+            // }
             console.log(graphData);
             this.setState({graphData});
         } catch (error) {
@@ -103,6 +112,9 @@ export default class ExchangeContainer extends Component {
     }
 
     render() {
+        if (this.state.graphData == null) {
+			return <div>Loading...</div>
+		}
         return (
             <div>
                 <form onSubmit={this.handleSubmit}>
@@ -126,24 +138,9 @@ export default class ExchangeContainer extends Component {
                     />
                     <input type='submit' value='Submit' />
                 </form>
-                <ChartCanvas height={400}
-                        // ratio={ratio}
-                        width={600}
-                        margin={{ left: 50, right: 50, top: 10, bottom: 30 }}
-                        // type={type}
-                        seriesName="MSFT"
-                        data={this.state.graphData}
-                        xAccessor={d => d.date}
-                        xScale={scaleTime()}
-                        // xExtents={xExtents}
-                        >
-
-                    <Chart id={1} yExtents={d => [d.high, d.low]}>
-                        <XAxis axisAt="bottom" orient="bottom" ticks={6}/>
-                        <YAxis axisAt="left" orient="left" ticks={5} />
-                        <CandlestickSeries />
-                    </Chart>
-                </ChartCanvas>
+                <TypeChooser>
+                    {type => <Graph type={type} data={this.state.graphData} />}
+                </TypeChooser>
             </div>
         )
     }

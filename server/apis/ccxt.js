@@ -77,7 +77,8 @@ module.exports = function(app) {
                     open: infoItem[1],
                     high: infoItem[2],
                     low: infoItem[3],
-                    close: infoItem[4]
+                    close: infoItem[4],
+                    volume: infoItem[5],
                 });
                 // plotData2.push({ x: infoItem[0], y: infoItem[4] });
             }

@@ -1,50 +1,55 @@
-import React, {Component} from 'react';
-import Highcharts from 'highcharts/highstock';
-// Load the exporting module.
-import * as Exporting from 'highcharts/modules/exporting';
-// Initialize exporting module.
-Exporting(Highcharts);
+import React from "react";
+import PropTypes from "prop-types";
 
-export default class Graph extends Component {
-    constructor(props) {
-        super(props);
-        
-    }
+import { scaleTime } from "d3-scale";
+import { utcDay } from "d3-time";
 
-    // componentDidMount() {
-        
-    // }
+import { ChartCanvas, Chart } from "react-stockcharts";
+import { CandlestickSeries } from "react-stockcharts/lib/series";
+import { XAxis, YAxis } from "react-stockcharts/lib/axes";
+import { fitWidth } from "react-stockcharts/lib/helper";
+import { last, timeIntervalBarWidth } from "react-stockcharts/lib/utils";
 
-    render() {
-        return (
-            Highcharts.stockChart('container', {
+class CandleStickChart extends React.Component {
+	render() {
+		const { type, width, data, ratio } = this.props;
+		const xAccessor = d => d.x;
+		const xExtents = [
+			xAccessor(last(data)),
+			xAccessor(data[data.length - 100])
+		];
+		return (
+			<ChartCanvas height={400}
+					ratio={ratio}
+					width={width}
+					margin={{ left: 50, right: 50, top: 10, bottom: 30 }}
+					type={type}
+					seriesName="MSFT"
+					data={data}
+					xAccessor={xAccessor}
+					xScale={scaleTime()}
+					xExtents={xExtents}>
 
-
-                rangeSelector: {
-                    selected: 1
-                },
-        
-                title: {
-                    text: 'AAPL Stock Price'
-                },
-        
-                series: [{
-                    type: 'candlestick',
-                    name: 'AAPL Stock Price',
-                    data: this.props.data,
-                    dataGrouping: {
-                        units: [
-                            [
-                                'week', // unit name
-                                [1] // allowed multiples
-                            ], [
-                                'month',
-                                [1, 2, 3, 4, 6]
-                            ]
-                        ]
-                    }
-                }]
-            })
-        )
-    }
+				<Chart id={1} yExtents={d => [d.high, d.low]}>
+					<XAxis axisAt="bottom" orient="bottom" ticks={6}/>
+					<YAxis axisAt="left" orient="left" ticks={5} />
+					<CandlestickSeries width={timeIntervalBarWidth(utcDay)}/>
+				</Chart>
+			</ChartCanvas>
+		);
+	}
 }
+
+CandleStickChart.propTypes = {
+	data: PropTypes.array.isRequired,
+	width: PropTypes.number.isRequired,
+	ratio: PropTypes.number.isRequired,
+	type: PropTypes.oneOf(["svg", "hybrid"]).isRequired,
+};
+
+CandleStickChart.defaultProps = {
+	type: "svg",
+};
+CandleStickChart = fitWidth(CandleStickChart);
+
+export default CandleStickChart;
