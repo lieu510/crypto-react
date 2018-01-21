@@ -2,7 +2,14 @@ import React, {Component} from 'react';
 import axios from 'axios';
 import Dropdown from '../components/dropdown';
 // import Graph from '../components/graph';
-import {CandlestickChart} from 'react-d3';
+// import {CandlestickChart} from 'react-d3';
+import { ChartCanvas, Chart } from "react-stockcharts";
+import { CandlestickSeries } from "react-stockcharts/lib/series";
+import { XAxis, YAxis } from "react-stockcharts/lib/axes";
+import { fitWidth } from "react-stockcharts/lib/helper";
+import { last, timeIntervalBarWidth } from "react-stockcharts/lib/utils";
+import { scaleTime } from "d3-scale";
+import { utcDay } from "d3-time";
 import moment from 'moment';
 
 const exchanges = ["bittrex", "binance"];
@@ -119,18 +126,24 @@ export default class ExchangeContainer extends Component {
                     />
                     <input type='submit' value='Submit' />
                 </form>
-                <CandlestickChart
-                    data={this.state.graphData}
-                    width={800}
-                    height={400}
-                    xAccessor={(d)=> {
-                            return new Date(d.x);
-                        }     
-                    }
-                    xAxisTickInterval={{unit: 'hour', interval: 24}}
-                    yAxisOffset={-10}
-                    title={this.state.market}
-                />
+                <ChartCanvas height={400}
+                        // ratio={ratio}
+                        width={600}
+                        margin={{ left: 50, right: 50, top: 10, bottom: 30 }}
+                        // type={type}
+                        seriesName="MSFT"
+                        data={this.state.graphData}
+                        xAccessor={d => d.date}
+                        xScale={scaleTime()}
+                        // xExtents={xExtents}
+                        >
+
+                    <Chart id={1} yExtents={d => [d.high, d.low]}>
+                        <XAxis axisAt="bottom" orient="bottom" ticks={6}/>
+                        <YAxis axisAt="left" orient="left" ticks={5} />
+                        <CandlestickSeries />
+                    </Chart>
+                </ChartCanvas>
             </div>
         )
     }
