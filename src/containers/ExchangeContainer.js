@@ -57,7 +57,7 @@ export default class ExchangeContainer extends Component {
         const exchange = this.state.exchange;
         const market = this.state.market.replace('/', '%2F');
         const timeframe = this.state.timeframe;
-        const date = moment().subtract(30, 'days').unix();
+        const date = moment().subtract(5, 'days').unix();
         const limit = '400';
         try {
             const getData = await axios.get(`/api/ccxt/${exchange}/${market}/${timeframe}/${date}000/${limit}`);
@@ -123,7 +123,11 @@ export default class ExchangeContainer extends Component {
                     data={this.state.graphData}
                     width={800}
                     height={400}
-                    xAxisTickInterval={{unit: 'month', interval: 1}}
+                    xAccessor={(d)=> {
+                            return new Date(d.x);
+                        }     
+                    }
+                    xAxisTickInterval={{unit: 'hour', interval: 24}}
                     yAxisOffset={-10}
                     title={this.state.market}
                 />
