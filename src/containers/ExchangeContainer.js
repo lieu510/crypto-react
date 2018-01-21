@@ -1,9 +1,10 @@
 import React, {Component} from 'react';
 import axios from 'axios';
-import Dropdown from '../components/dropdown';
-// import Graph from '../components/graph';
-import {CandlestickChart} from 'react-d3';
 import moment from 'moment';
+import Dropdown from '../components/dropdown';
+import Chart from '../components/chart';
+import { TypeChooser } from "react-stockcharts/lib/helper";
+// import {CandlestickChart} from 'react-d3';
 
 const exchanges = ["bittrex", "binance"];
 // let markets = [];
@@ -14,19 +15,10 @@ export default class ExchangeContainer extends Component {
         this.state = {
             exchange: 'bittrex',
             markets: [],
-            market: '',
+            market: 'BTC/USDT',
             timeframes: [],
-            timeframe: '',
-            graphData: {
-                name: '',
-                values: [{
-                    x: moment(),
-                    open: 0,
-                    high: 0,
-                    low: 0,
-                    close: 0,
-                }],
-            },
+            timeframe: '1h',
+            data: [],
         };
     
         this.handleExchangeChange = this.handleExchangeChange.bind(this);
@@ -36,6 +28,10 @@ export default class ExchangeContainer extends Component {
     }
 
     componentDidMount() {
+        const date = moment().subtract(5, 'days').unix();
+        axios.get(`/api/ccxt/${this.state.exchange}/${this.state.market}/${this.state.timeframe}/${date}000/400`).then(data => {
+			this.setState({ data })
+		})
         this.loadMarkets(this.state.exchange);
     }
     
@@ -61,15 +57,15 @@ export default class ExchangeContainer extends Component {
         const limit = '400';
         try {
             const getData = await axios.get(`/api/ccxt/${exchange}/${market}/${timeframe}/${date}000/${limit}`);
-            const priceData = getData.data.closingPrice;
+            const graphData = getData.data.closingPrice;
             // const priceDataArr = priceData.map((data) => data.y);
             // const timeDataArr = priceData.map((data) => data.x);
-            const graphData = {
-                name: this.state.market,
-                values: priceData,
-            }
+            // const graphData = {
+            //     name: this.state.market,
+            //     values: priceData,
+            // }
             console.log(graphData);
-            this.setState({graphData});
+            this.setState({data: graphData});
         } catch (error) {
             console.log(error);
             return false;
@@ -96,6 +92,9 @@ export default class ExchangeContainer extends Component {
     }
 
     render() {
+        if (this.state.data == null) {
+			return <div>Loading...</div>
+		}
         return (
             <div>
                 <form onSubmit={this.handleSubmit}>
@@ -119,18 +118,9 @@ export default class ExchangeContainer extends Component {
                     />
                     <input type='submit' value='Submit' />
                 </form>
-                <CandlestickChart
-                    data={this.state.graphData}
-                    width={800}
-                    height={400}
-                    xAccessor={(d)=> {
-                            return new Date(d.x);
-                        }     
-                    }
-                    xAxisTickInterval={{unit: 'hour', interval: 24}}
-                    yAxisOffset={-10}
-                    title={this.state.market}
-                />
+                <TypeChooser>
+                    {type => <Chart type={type} data={this.state.data} />}
+                </TypeChooser>
             </div>
         )
     }
