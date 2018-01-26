@@ -110,12 +110,6 @@ export default class ExchangeContainer extends Component {
                         handleChange={this.handleMarketChange}
                         value={this.state.market}
                     />
-                    <label>Timeframe:</label>
-                    <Dropdown 
-                        list={this.state.timeframes} 
-                        handleChange={this.handleTimeframeChange}
-                        value={this.state.timeframe}
-                    />
                     <input type='submit' value='Submit' />
                 </form>
                 <TypeChooser>
