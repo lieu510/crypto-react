@@ -26,7 +26,7 @@ app.use(logger('dev'));
 // app.use(flash());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
-app.use(express.static("public"));
+app.use("/react-ui", express.static("public"));
 // app.use(cookieParser());
 // app.use(express.static(path.join(__dirname, 'public')));
 
