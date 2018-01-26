@@ -52,7 +52,8 @@ export default class ExchangeContainer extends Component {
         event.preventDefault();
         const exchange = this.state.exchange;
         const market = this.state.market.replace('/', '%2F');
-        const timeframe = this.state.timeframe;
+        const timeframe = '1h';
+        // const timeframe = this.state.timeframe;
         const date = moment().subtract(5, 'days').unix();
         const limit = '400';
         try {
