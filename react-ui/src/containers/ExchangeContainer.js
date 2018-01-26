@@ -52,8 +52,7 @@ export default class ExchangeContainer extends Component {
         event.preventDefault();
         const exchange = this.state.exchange;
         const market = this.state.market.replace('/', '%2F');
-        const timeframe = '1h';
-        // const timeframe = this.state.timeframe;
+        const timeframe = this.state.timeframe;
         const date = moment().subtract(5, 'days').unix();
         const limit = '400';
         try {
@@ -110,6 +109,12 @@ export default class ExchangeContainer extends Component {
                         list={this.state.markets} 
                         handleChange={this.handleMarketChange}
                         value={this.state.market}
+                    />
+                    <label>Timeframe:</label>
+                    <Dropdown 
+                        list={this.state.timeframes} 
+                        handleChange={this.handleTimeframeChange}
+                        value={this.state.timeframe}
                     />
                     <input type='submit' value='Submit' />
                 </form>
