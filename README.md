@@ -14,7 +14,7 @@ For best quality, please view BTC/USDT on '1h' timeframe.
 
 ## Screenshot
 
-![screenshot](public/assets/img/crypto-react.png)
+![screenshot](react-ui/public/crypto-react.png)
 
 
 ### Authors
